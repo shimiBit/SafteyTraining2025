@@ -47,12 +47,11 @@ export async function generateTrainingModule(topic: string): Promise<string> {
     `;
     
     try {
-        // FIX: The systemInstruction property must be inside the config object.
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
-            config: {
-                systemInstruction: systemInstruction,
+            systemInstruction: systemInstruction,
+            generationConfig: {
                 temperature: 0.5,
             }
         });
