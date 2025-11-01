@@ -45,7 +45,7 @@ const SimpleMarkdownParser: React.FC<{ text: string }> = ({ text }) => {
       } else if (trimmedLine.length > 0) {
         renderList();
         elements.push(<p key={index} className="text-gray-700 leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: formatBold(trimmedLine) }} />);
-      } else {
+      } else if (listItems.length === 0) {
         renderList();
       }
     });
