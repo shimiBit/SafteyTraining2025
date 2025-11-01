@@ -1,20 +1,21 @@
 
 import React from 'react';
-import { SAFETY_TOPICS, SafetyTopic } from '../constants';
+import { SafetyTopic } from '../constants';
 
 interface TopicSelectorProps {
+  topics: SafetyTopic[];
   selectedTopic: SafetyTopic | null;
   onSelectTopic: (topic: SafetyTopic) => void;
 }
 
-export const TopicSelector: React.FC<TopicSelectorProps> = ({ selectedTopic, onSelectTopic }) => {
+export const TopicSelector: React.FC<TopicSelectorProps> = ({ topics, selectedTopic, onSelectTopic }) => {
   return (
     <div>
       <label htmlFor="topic-selector" className="block text-lg font-medium text-gray-700 mb-4 text-center">
         בחר/י נושא להדרכה
       </label>
       <div id="topic-selector" className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {SAFETY_TOPICS.map((topic) => (
+        {topics.map((topic) => (
           <button
             key={topic.id}
             onClick={() => onSelectTopic(topic)}

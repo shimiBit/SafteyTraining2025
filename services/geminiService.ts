@@ -66,3 +66,55 @@ export async function generateTrainingModule(topic: string): Promise<string> {
         throw new Error("Failed to generate training module from Gemini API.");
     }
 }
+
+export interface QuizQuestion {
+    question: string;
+    options: string[];
+    correctAnswer: string;
+}
+
+export async function generateQuiz(trainingContent: string): Promise<QuizQuestion[]> {
+    const systemInstruction = `אתה מומחה ביצירת בחנים חינוכיים. תפקידך הוא ליצור בוחן מבוסס על חומר הדרכה נתון.`;
+    const prompt = `
+    בהתבסס על תוכן ההדרכה הבא, צור בוחן של 5 שאלות אמריקאיות.
+    ודא שהשאלות מכסות את הנושאים המרכזיים של ההדרכה.
+    לכל שאלה, ספק 4 תשובות אפשריות, כאשר רק אחת מהן נכונה.
+
+    החזר את הבוחן בפורמט JSON בלבד, במבנה הבא:
+    [
+      {
+        "question": "זוהי השאלה הראשונה?",
+        "options": ["תשובה 1", "תשובה 2", "תשובה 3", "תשובה 4"],
+        "correctAnswer": "תשובה 3"
+      },
+      ...
+    ]
+
+    תוכן ההדרכה:
+    ---
+    ${trainingContent}
+    ---
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+            }
+        });
+
+        if (response && response.text) {
+            // Clean the response to ensure it's valid JSON
+            const jsonText = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(jsonText);
+        } else {
+            throw new Error("No content received from Gemini API for quiz.");
+        }
+    } catch (error) {
+        console.error("Error calling Gemini API for quiz:", error);
+        throw new Error("Failed to generate quiz from Gemini API.");
+    }
+}

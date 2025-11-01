@@ -2,15 +2,19 @@
 import React, { useState, useCallback } from 'react';
 import { Header } from './components/Header';
 import { TopicSelector } from './components/TopicSelector';
+import { AddTopicForm } from './components/AddTopicForm';
 import { TrainingDisplay } from './components/TrainingDisplay';
+import { QuizDisplay } from './components/QuizDisplay';
 import { Loader } from './components/Loader';
-import { generateTrainingModule } from './services/geminiService';
+import { generateTrainingModule, generateQuiz, QuizQuestion } from './services/geminiService';
 import { SAFETY_TOPICS, SafetyTopic } from './constants';
 import { WelcomeSplash } from './components/WelcomeSplash';
 
 const App: React.FC = () => {
+  const [safetyTopics, setSafetyTopics] = useState<SafetyTopic[]>(SAFETY_TOPICS);
   const [selectedTopic, setSelectedTopic] = useState<SafetyTopic | null>(null);
   const [trainingContent, setTrainingContent] = useState<string | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,17 +27,24 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setTrainingContent(null);
+    setQuizQuestions([]);
 
     try {
       const content = await generateTrainingModule(selectedTopic.title);
       setTrainingContent(content);
+      const quiz = await generateQuiz(content);
+      setQuizQuestions(quiz);
     } catch (err) {
-      setError("אירעה שגיאה בעת יצירת ההדרכה. אנא נסה שוב מאוחר יותר.");
+      setError("אירעה שגיאה בעת יצירת ההדרכה או הבוחן. אנא נסה שוב מאוחר יותר.");
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   }, [selectedTopic]);
+
+  const handleAddTopic = (newTopic: SafetyTopic) => {
+    setSafetyTopics((prevTopics) => [...prevTopics, newTopic]);
+  };
 
   return (
     <div className="min-h-screen bg-light text-dark font-sans flex flex-col">
@@ -45,9 +56,11 @@ const App: React.FC = () => {
           </h2>
           <div className="space-y-6">
             <TopicSelector
+              topics={safetyTopics}
               selectedTopic={selectedTopic}
               onSelectTopic={setSelectedTopic}
             />
+            <AddTopicForm onAddTopic={handleAddTopic} />
             <div className="flex justify-center">
               <button
                 onClick={handleGenerateTraining}
@@ -69,7 +82,12 @@ const App: React.FC = () => {
           <div className="mt-8">
             {isLoading && <Loader />}
             {!isLoading && !trainingContent && <WelcomeSplash />}
-            {trainingContent && <TrainingDisplay content={trainingContent} />}
+            {trainingContent && (
+              <>
+                <TrainingDisplay content={trainingContent} />
+                {quizQuestions.length > 0 && <QuizDisplay questions={quizQuestions} />}
+              </>
+            )}
           </div>
         </div>
       </main>
