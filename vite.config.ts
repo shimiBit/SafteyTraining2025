@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
         plugins: [react()],
         base: '/SafteyTraining2025/', //   <--- הוסף את השורה הזו
         define: {
-            'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
             'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
         },
         resolve: {

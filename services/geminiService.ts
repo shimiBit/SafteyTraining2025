@@ -1,11 +1,11 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
+if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function generateTrainingModule(topic: string): Promise<string> {
     const systemInstruction = `אתה מומחה בכיר לבטיחות בעבודה, עם התמחות עמוקה בחוקים ובתקנות של מדינת ישראל. תפקידך הוא ליצור חומרי הדרכה מקיפים, ברורים ומדויקים. עליך להתבסס אך ורק על חקיקה ישראלית רלוונטית (כגון פקודת הבטיחות בעבודה, חוק ארגון הפיקוח על העבודה, ותקנות ספציפיות לנושא).`;
@@ -47,7 +47,6 @@ export async function generateTrainingModule(topic: string): Promise<string> {
     `;
     
     try {
-        // FIX: The systemInstruction property must be inside the config object.
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
